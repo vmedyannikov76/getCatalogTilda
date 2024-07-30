@@ -1,3 +1,7 @@
+function startCode(){
+
+console.log('запуск');
+    const dataCards = {};
 fetch(
   "https://store.tildaapi.com/api/getproductslist/?storepartuid=544779902021&recid=696926969&c=1722315676976&getparts=true&getoptions=true&slice=1&size=200"
 )
@@ -12,8 +16,8 @@ fetch(
     for (let {color,value} of data.options[0].values) {
         colors[value] = color
     }
-    console.log(colors);
-    const dataCards = {};
+    // console.log(colors);
+    // const dataCards = {};
     for (let prod of data.products) {
         let item = {};
         item["link"] = prod.url; //ссылка на карточку
@@ -25,36 +29,45 @@ fetch(
             dataCards[prod.title] = [item];
         }
     }
-    function createColorBlockNEW() {//цвета для каталога товаров
-        // if(!localStorage.dataNew||(localStorage.dataNew && localStorage.dataNew.length<5))return
-        const cards = document.querySelectorAll(".js-product.t-store__card:not(#rec736593178 .js-product.t-store__card)"); //все карточки на странице
-        cards.forEach((element) => {
-            if (element.querySelector(".block-color .element-color")) return; //если значки есть, то не нужно
-            const div = document.createElement("div");
-            const name = element.querySelector(".js-store-prod-name").textContent; //название товара
-            const color = element.querySelector('[name="Цвет"]')?.value//название цвета в карточке
-            div.classList.add("block-color");
-            element.querySelector(".js-store-price-wrapper").append(div); //вставим элемент в блок с ценой
-            // if(!localStorage.dataNew) return//если записи в памяти пока нет то ничего не делаем
-            // if(name === "Подарочный сертификат") return
-            let countColor = dataCards[name]; //количество цветов
-            for (let i = 0; countColor.length > i; i++) {
-                const divI = document.createElement("div");
-                divI.classList.add("element-color");
-                //запишем цвет и применим к нему стили
-                if(color === countColor[i].colorName) divI.dataset.activColor = true;
-                divI.style.backgroundColor = countColor[i].color;
-                div.append(divI);
-            }
-        });
+  }
+);
+
+function createColorBlockCardsNEW() {//для открытой карточки
+    if(Object.keys(dataCards).length == 0) return//если объект базы пустой то ничего не делаем
+    if (!document.querySelector(".t-store__prod-popup__info")) return; //если открыта не карточка то ничего не делаем
+    if (!document.querySelector('.t-store__prod-popup__info [data-edition-option-id="Цвет"] div.t-product__option-title')) return
+
+    // if (document.querySelector(".t-store__prod-popup__info .block-color")) return; //если значки есть, то не нужно
+    if (!!document.querySelector(".t-store__prod-popup__info .block-color")) return; //если значки есть, то не нужно
+
+    let textColor = document.querySelector('.t-store__prod-popup__info [data-edition-option-id="Цвет"] .t-product__option-title');
+    const div = document.createElement("div");
+    const name = document.querySelector(".t-store__prod-popup__info .js-product-name").textContent; //название товара
+    div.classList.add("block-color");
+    const color = document.querySelector('[name="Цвет"]')?.value//название цвета в карточке
+    document.querySelector('.t-store__prod-popup__info [data-edition-option-id="Цвет"] div.t-product__option-title').append(div); //вставим элемент в блок с описанием страницы
+    // if(!localStorage.dataNew) return//если записи в памяти пока нет то ничего не делаем
+    const countColor = dataCards[name]; //количество цветов
+    for (let i = 0; countColor.length > i; i++) {
+        const divI = document.createElement("a");
+        divI.href = countColor[i].link;
+        // divI.title = countColor[i].colorName;
+        divI.classList.add("element-color");
+        //запишем цвет и применим к нему стили
+        if(color === countColor[i].colorName) {
+            divI.dataset.activColor = true;
+        //добавим название цвета
+        textColor.dataset.nameColor = ': '+ countColor[i].colorName
+        }
+        divI.style.backgroundColor = countColor[i].color;
+        div.append(divI);
+
     }
-    createColorBlockNEW()
-    console.log(dataCards);
+}
+// createColorBlockCardsNEW()
 
-  });
-
-//******************************************************* */
-function createColorBlockNEW() {
+function createColorBlockNEW() {//цвета для каталога товаров
+    if(Object.keys(dataCards).length == 0) return //если объект базы пустой то ничего не делаем
     // if(!localStorage.dataNew||(localStorage.dataNew && localStorage.dataNew.length<5))return
     const cards = document.querySelectorAll(".js-product.t-store__card:not(#rec736593178 .js-product.t-store__card)"); //все карточки на странице
     cards.forEach((element) => {
@@ -66,10 +79,11 @@ function createColorBlockNEW() {
         element.querySelector(".js-store-price-wrapper").append(div); //вставим элемент в блок с ценой
         // if(!localStorage.dataNew) return//если записи в памяти пока нет то ничего не делаем
         // if(name === "Подарочный сертификат") return
-        let countColor = JSON.parse(localStorage.dataNew)[name]; //количество цветов
+        let countColor = dataCards[name]; //количество цветов
         for (let i = 0; countColor.length > i; i++) {
             const divI = document.createElement("div");
             divI.classList.add("element-color");
+            // divI.title = countColor[i].colorName;
             //запишем цвет и применим к нему стили
             if(color === countColor[i].colorName) divI.dataset.activColor = true;
             divI.style.backgroundColor = countColor[i].color;
@@ -77,31 +91,52 @@ function createColorBlockNEW() {
         }
     });
 }
-createColorBlockNEW()
+// createColorBlockNEW()
 
-function createColorBlockCardsNEW() {
-    if (!document.querySelector(".t-store__prod-popup__info")) return; //если открыта не карточка то ничего не делаем
-    if (!document.querySelector('.t-store__prod-popup__info [data-edition-option-id="Цвет"] div.t-product__option-title')) return
+setInterval(() => {
+    // console.log('работаем');
+    // renameColorBasket();
+    createColorBlockNEW();
+    createColorBlockCardsNEW();
+    // reNameOptionsBasket();
+}, 700);
 
-    if (document.querySelector(".t-store__prod-popup__info .block-color")) return; //если значки есть, то не нужно
-    const div = document.createElement("div");
-    const name = document.querySelector(".t-store__prod-popup__info .js-product-name").textContent; //название товара
-    div.classList.add("block-color");
-    const color = document.querySelector('[name="Цвет"]')?.value//название цвета в карточке
-    document.querySelector('.t-store__prod-popup__info [data-edition-option-id="Цвет"] div.t-product__option-title').append(div); //вставим элемент в блок с описанием страницы
-    // if(!localStorage.dataNew) return//если записи в памяти пока нет то ничего не делаем
-    const countColor = JSON.parse(localStorage.dataNew)[name]; //количество цветов
-    for (let i = 0; countColor.length > i; i++) {
-        const divI = document.createElement("a");
-        divI.href = countColor[i].link;
-        divI.textContent = countColor[i].colorName;
-        divI.classList.add("element-color");
-        //запишем цвет и применим к нему стили
-        if(color === countColor[i].colorName) divI.dataset.activColor = true;
-        divI.style.backgroundColor = countColor[i].color;
-        div.append(divI);
-    }
 }
+document.addEventListener('DOMContentLoaded', startCode)
+
+
+
+
+//******************************************************* */
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 function renameColorBasket() {
     //изменим наименование опции
     const lictOption = document.querySelectorAll(
