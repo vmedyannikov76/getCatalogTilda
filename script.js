@@ -1,4 +1,26 @@
-  //работа с вариантами цветов
+//кирилический запрос
+URL = "https://search.tildacdn.com/search/?p=7103656&q=" + encodeURIComponent('платье') + "&page=1&num=15&hs=50&st=s"   //num=15- количество записей
+fetch(URL)
+      .then((response) => {
+        // console.log("это json");
+        return response.json();
+      })
+      .then((data) => {
+        // console.log("это дата");
+        // console.log(data.options[numberOptions].values);
+        console.log(data);
+
+      }
+    );
+
+
+
+
+
+
+
+
+//работа с вариантами цветов
   function startCode(){
 
     console.log('запуск');
